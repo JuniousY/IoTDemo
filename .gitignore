@@ -25,6 +25,12 @@ go.work.sum
 # env file
 .env
 
+# intellij
+.idea
+
+# vscode
+.vscode
+
 # demo 测试文件夹
 /demo
 /demo2

@@ -1,0 +1,46 @@
+version: '3.8'
+
+networks:
+  iot_network:
+    driver: bridge
+
+services:
+  # MySQL 数据库 - 如果需要就去掉注释
+#  mysql:
+#    image: mysql:8.0
+#    container_name: mysql
+#    restart: always
+#    environment:
+#      MYSQL_DATABASE: iot
+#      MYSQL_ROOT_PASSWORD: 123456
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+#    networks:
+#      - iot_net
+
+  # Redis 缓存  - 如果需要就去掉注释
+#  redis:
+#    image: redis:7
+#    container_name: redis
+#    restart: always
+#    ports:
+#      - "6379:6379"
+#    networks:
+#      - iot_net
+
+  emqx:
+    image: emqx/emqx:5.10.0
+    container_name: emqx
+    restart: always
+    ports:
+      - "1883:1883"
+      - "8083:8083"
+      - "8883:8883"
+      - "8084:8084"
+      - "18083:18083"
+    volumes:
+      - ../conf/emqx/etc:/opt/emqx/etc
+    networks:
+      - app_network
