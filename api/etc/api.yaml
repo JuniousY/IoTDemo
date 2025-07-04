@@ -1,0 +1,15 @@
+Name: IoTDemo
+Host: 0.0.0.0
+Port: 8080
+
+Redis:
+  Host: 127.0.0.1:6379
+  Pass:
+  Type: node
+
+Mysql:
+  Host: 127.0.0.1
+  Port: 3306
+  User: root
+  Password: password
+  Database: demo

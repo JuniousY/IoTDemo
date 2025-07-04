@@ -1,0 +1,43 @@
+syntax = "v1"
+
+type (
+	CreateDeviceReq {
+		ProductId int    `json:"productId"`
+		Name      string `json:"name"`
+		Info      string `json:"info"`
+	}
+	CreateDeviceResp {
+		Info DeviceInfo `json:"info"`
+	}
+	DeviceInfo {
+		Id        int64  `json:"id"`
+		ProductId int    `json:"productId"`
+		Name      string `json:"name"`
+		Info      string `json:"info"`
+		Status    int    `json:"status"`
+		IsOnline  int    `json:"isOnline"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
+	}
+	ListDeviceReq {
+		Page int `form:"page,default=1"`
+		Size int `form:"size,default=10"`
+	}
+	ListDeviceResp {
+		Total int64        `json:"total"`
+		List  []DeviceInfo `json:"list"`
+	}
+)
+
+@server (
+	group:  device
+	prefix: /api/v1/device
+)
+service api {
+	@handler CreateDevice
+	post /create (CreateDeviceReq) returns (CreateDeviceResp)
+
+	@handler ListDevice
+	get /list (ListDeviceReq) returns (ListDeviceResp)
+}
+
