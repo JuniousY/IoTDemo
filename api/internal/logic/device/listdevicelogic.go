@@ -1,7 +1,7 @@
 package device
 
 import (
-	"api/internal/model"
+	"api/internal/logic"
 	"api/internal/repo"
 	"context"
 	"errors"
@@ -32,7 +32,7 @@ func (l *ListDeviceLogic) ListDevice(req *types.ListDeviceReq) (resp *types.List
 	}
 	f := repo.DeviceFilter{}
 
-	total, err := l.svcCtx.DeviceInfoRepo.CountByFilter(l.ctx, f)
+	total, err := l.svcCtx.DeviceRepo.CountByFilter(l.ctx, f)
 	if err != nil {
 		return &types.ListDeviceResp{Total: 0}, err
 	}
@@ -40,30 +40,17 @@ func (l *ListDeviceLogic) ListDevice(req *types.ListDeviceReq) (resp *types.List
 		return &types.ListDeviceResp{Total: 0}, nil
 	}
 
-	devices, err := l.svcCtx.DeviceInfoRepo.FindByFilter(l.ctx, f, (req.Page-1)*req.Size, req.Size)
+	devices, err := l.svcCtx.DeviceRepo.FindByFilter(l.ctx, f, (req.Page-1)*req.Size, req.Size)
 	if err != nil {
 		return &types.ListDeviceResp{Total: 0}, err
 	}
 
 	var list []types.DeviceInfo
 	for _, d := range devices {
-		list = append(list, *toDeviceInfo(d))
+		list = append(list, *logic.ToDeviceInfo(d))
 	}
 	return &types.ListDeviceResp{
 		Total: total,
 		List:  list,
 	}, nil
-}
-
-func toDeviceInfo(d *model.Device) *types.DeviceInfo {
-	return &types.DeviceInfo{
-		Id:        d.ID,
-		ProductId: d.ProductID,
-		Name:      d.Name,
-		Info:      d.Info,
-		Status:    d.Status,
-		IsOnline:  d.IsOnline,
-		CreatedAt: d.CreateTime.Format("2006-01-02 15:04:05"),
-		UpdatedAt: d.UpdateTime.Format("2006-01-02 15:04:05"),
-	}
 }

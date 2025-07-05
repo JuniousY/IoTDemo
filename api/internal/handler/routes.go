@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	device "api/internal/handler/device"
+	product "api/internal/handler/product"
 	"api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -27,5 +28,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 		rest.WithPrefix("/api/v1/device"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/detail",
+				Handler: product.DetailHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1/product"),
 	)
 }

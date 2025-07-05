@@ -31,7 +31,6 @@ type CacheConfig[dataT any, keyT comparable] struct {
 	ExpireTime time.Duration
 	Redis      *redis.Redis
 	RawRedis   *rd.Client
-	Ctx        context.Context
 }
 
 var (
@@ -67,10 +66,7 @@ func NewCache[dataT any, keyT comparable](cfg CacheConfig[dataT, keyT]) (*Cache[
 
 	cacheMap[cfg.KeyType] = &ret
 
-	ctx := cfg.Ctx
-	if ctx == nil {
-		ctx = context.Background()
-	}
+	ctx := context.Background()
 	ret.StartPubSub(ctx)
 	return &ret, nil
 }
@@ -130,6 +126,7 @@ func (c *Cache[dataT, keyT]) SetData(ctx context.Context, key keyT, data *dataT)
 		}
 	} else {
 		// 短时间缓存空值 防止缓存穿透
+		c.localCache.Set(keyStr, nil)
 		err := c.redis.SetexCtx(ctx, cacheKey, "NULL", 10)
 		if err != nil {
 			return err

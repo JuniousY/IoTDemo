@@ -4,24 +4,24 @@
 package types
 
 type CreateDeviceReq struct {
-	ProductId int    `json:"productId"`
-	Name      string `json:"name"`
-	Info      string `json:"info"`
-}
-
-type CreateDeviceResp struct {
-	Info DeviceInfo `json:"info"`
+	ProductId  int    `json:"productId"`
+	DeviceName string `json:"deviceName"`
+	Info       string `json:"info,optional"`
 }
 
 type DeviceInfo struct {
-	Id        int64  `json:"id"`
-	ProductId int    `json:"productId"`
-	Name      string `json:"name"`
-	Info      string `json:"info"`
-	Status    int    `json:"status"`
-	IsOnline  int    `json:"isOnline"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	Id         int64  `json:"id"`
+	ProductId  int    `json:"productId"`
+	DeviceName string `json:"deviceName"`
+	Info       string `json:"info"`
+	Status     int    `json:"status"`
+	IsOnline   int    `json:"isOnline"`
+	CreatedAt  string `json:"createdAt"`
+	UpdatedAt  string `json:"updatedAt"`
+}
+
+type DeviceResp struct {
+	Info DeviceInfo `json:"info"`
 }
 
 type ListDeviceReq struct {
@@ -32,4 +32,17 @@ type ListDeviceReq struct {
 type ListDeviceResp struct {
 	Total int64        `json:"total"`
 	List  []DeviceInfo `json:"list"`
+}
+
+type ProductDetailReq struct {
+	Id int `form:"id"`
+}
+
+type ProductDetailResp struct {
+	Info ProductInfo `json:"info"`
+}
+
+type ProductInfo struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }

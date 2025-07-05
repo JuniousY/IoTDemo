@@ -6,17 +6,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type deviceInfoRepo struct {
+type deviceRepo struct {
 	db *gorm.DB
 }
 
 type DeviceFilter struct {
-	ID         int64
+	ID         *int64
 	IDs        []int64
-	ProductIDs []string
+	ProductID  *int
+	ProductIDs []int
+	DeviceName *string
+	Status     *int
 }
 
-type DeviceInfoRepo interface {
+type DeviceRepo interface {
 	Create(ctx context.Context, device *model.Device) error
 	FindOneByFilter(ctx context.Context, f DeviceFilter) (*model.Device, error)
 	CountByFilter(ctx context.Context, f DeviceFilter) (int64, error)
@@ -24,26 +27,37 @@ type DeviceInfoRepo interface {
 	UpdateOnlineStatus(ctx context.Context, id int64, isOnline int) error
 }
 
-func NewDeviceInfoRepo(db *gorm.DB) DeviceInfoRepo {
-	return &deviceInfoRepo{db: db}
+func NewDeviceRepo(db *gorm.DB) DeviceRepo {
+	return &deviceRepo{db: db}
 }
 
-func (r *deviceInfoRepo) Create(ctx context.Context, device *model.Device) error {
+func (r *deviceRepo) Create(ctx context.Context, device *model.Device) error {
 	return r.db.WithContext(ctx).Model(&model.Device{}).Create(device).Error
 }
 
-func (r *deviceInfoRepo) fmtFilter(ctx context.Context, f DeviceFilter) *gorm.DB {
+func (r *deviceRepo) fmtFilter(ctx context.Context, f DeviceFilter) *gorm.DB {
 	db := r.db.WithContext(ctx).Model(&model.Device{})
-	if f.ID != 0 {
+	if f.ID != nil {
 		db = db.Where("id = ?", f.ID)
 	}
+	if f.ProductID != nil {
+		db = db.Where("product_id = ?", f.ProductID)
+	}
 	if len(f.ProductIDs) > 0 {
-		db = db.Where("id in ?", f.ProductIDs)
+		db = db.Where("product_id in ?", f.ProductIDs)
+	}
+	if f.DeviceName != nil {
+		db = db.Where("name = ?", *f.DeviceName)
+	}
+	if f.Status != nil {
+		db = db.Where("status = ?", f.Status)
+	} else {
+		db = db.Where("status != ?", model.DeviceStatusDeleted)
 	}
 	return db
 }
 
-func (r *deviceInfoRepo) FindOneByFilter(ctx context.Context, f DeviceFilter) (*model.Device, error) {
+func (r *deviceRepo) FindOneByFilter(ctx context.Context, f DeviceFilter) (*model.Device, error) {
 	var result model.Device
 	db := r.fmtFilter(ctx, f)
 	err := db.WithContext(ctx).First(&result).Error
@@ -53,7 +67,7 @@ func (r *deviceInfoRepo) FindOneByFilter(ctx context.Context, f DeviceFilter) (*
 	return &result, nil
 }
 
-func (r *deviceInfoRepo) CountByFilter(ctx context.Context, f DeviceFilter) (int64, error) {
+func (r *deviceRepo) CountByFilter(ctx context.Context, f DeviceFilter) (int64, error) {
 	var total int64
 	if err := r.fmtFilter(ctx, f).Count(&total).Error; err != nil {
 		return 0, err
@@ -61,7 +75,7 @@ func (r *deviceInfoRepo) CountByFilter(ctx context.Context, f DeviceFilter) (int
 	return total, nil
 }
 
-func (r *deviceInfoRepo) FindByFilter(ctx context.Context, f DeviceFilter, offset, limit int) ([]*model.Device, error) {
+func (r *deviceRepo) FindByFilter(ctx context.Context, f DeviceFilter, offset, limit int) ([]*model.Device, error) {
 	var devices []*model.Device
 	if err := r.fmtFilter(ctx, f).
 		Offset(offset).Limit(limit).
@@ -71,7 +85,7 @@ func (r *deviceInfoRepo) FindByFilter(ctx context.Context, f DeviceFilter, offse
 	return devices, nil
 }
 
-func (r *deviceInfoRepo) UpdateOnlineStatus(ctx context.Context, id int64, isOnline int) error {
+func (r *deviceRepo) UpdateOnlineStatus(ctx context.Context, id int64, isOnline int) error {
 	return r.db.WithContext(ctx).
 		Model(&model.Device{}).
 		Where("id = ?", id).
