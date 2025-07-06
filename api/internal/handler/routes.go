@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	device "api/internal/handler/device"
+	deviceauth "api/internal/handler/device/auth"
 	product "api/internal/handler/product"
 	"api/internal/svc"
 
@@ -28,6 +29,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 		rest.WithPrefix("/api/v1/device"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 设备登录认证
+				Method:  http.MethodPost,
+				Path:    "/login",
+				Handler: deviceauth.LoginHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1/device/auth"),
 	)
 
 	server.AddRoutes(

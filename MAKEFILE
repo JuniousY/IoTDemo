@@ -1,0 +1,31 @@
+.PHONY: build deploy up
+
+# 构建Docker镜像
+build:
+	@echo "======== DOCKER BUILD START ========"
+	docker build -f Dockerfile -t iot-demo .
+
+# 部署服务
+deploy:
+	@echo "======== DOCKER COMPOSE DEPLOY START ========"
+	cd deploy/docker && docker compose up -d
+
+down:
+	@echo "======== STOPPING SERVICES ========"
+	cd $(COMPOSE_DIR) && docker compose down
+	@echo "Services stopped"
+
+# 清理镜像
+clean:
+	@echo "======== CLEANING IMAGES ========"
+	docker rmi $(IMAGE_NAME) || true
+	@echo "Images cleaned"
+
+# 强制重新构建（无缓存）
+rebuild:
+	@echo "======== REBUILDING IMAGE (NO-CACHE) ========"
+	docker build --no-cache -f $(DOCKERFILE) -t $(IMAGE_NAME) .
+	@echo "Image rebuilt"
+
+# 一键构建并部署
+up: build deploy

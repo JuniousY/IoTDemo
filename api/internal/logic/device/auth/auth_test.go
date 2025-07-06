@@ -1,0 +1,27 @@
+package auth
+
+import (
+	"api/internal/utils"
+	"fmt"
+	"testing"
+	"time"
+)
+
+func TestAuth(t *testing.T) {
+	const productId = 1
+	const deviceId = 100
+	connId, _ := utils.SecureRandomString(6)
+	timeStamp := time.Now().Unix()
+	const secret = "RAbIea3ml_dO2kdV0vmj"
+
+	ld := &LoginDevice{
+		ProductID: productId,
+		DeviceID:  deviceId,
+		ConnID:    connId,
+		Timestamp: timeStamp,
+	}
+	username := fmt.Sprintf("%d;%d;%s;%d", ld.ProductID, ld.DeviceID, ld.ConnID, ld.Timestamp)
+
+	password := utils.HmacSha256Pass(username, []byte(secret))
+	fmt.Printf("生成的password为%s\n", password)
+}

@@ -60,3 +60,4 @@ service api {
 	get /detail (ProductDetailReq) returns (ProductDetailResp)
 }
 
+import "auth.api"

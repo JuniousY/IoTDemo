@@ -20,6 +20,17 @@ type DeviceInfo struct {
 	UpdatedAt  string `json:"updatedAt"`
 }
 
+type DeviceLoginReq struct {
+	Username    string `json:"username"`                       //用户名
+	Password    string `json:"password,optional"`              //密码
+	Ip          string `json:"ip"`                             //访问的ip地址
+	Certificate string `json:"certificate,optional,omitempty"` //客户端证书 base64后传过来
+}
+
+type DeviceLoginResp struct {
+	Result string `json:"result"` //验证结果 "allow" | "deny" | "ignore"
+}
+
 type DeviceResp struct {
 	Info DeviceInfo `json:"info"`
 }
