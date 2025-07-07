@@ -30,6 +30,7 @@ WORKDIR /app
 
 # 从 builder 拷贝编译好的二进制文件
 COPY --from=builder /app/app .
+COPY --from=builder /app/etc ./etc
 
 # 开放端口
 EXPOSE 8080

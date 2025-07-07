@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   iot_network:
     driver: bridge

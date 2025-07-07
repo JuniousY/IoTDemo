@@ -9,10 +9,10 @@ import (
 
 func TestAuth(t *testing.T) {
 	const productId = 1
-	const deviceId = 100
+	const deviceId = 1
 	connId, _ := utils.SecureRandomString(6)
 	timeStamp := time.Now().Unix()
-	const secret = "RAbIea3ml_dO2kdV0vmj"
+	const secret = "RAbIee3mldOc_kdV0vmj"
 
 	ld := &LoginDevice{
 		ProductID: productId,
@@ -23,5 +23,5 @@ func TestAuth(t *testing.T) {
 	username := fmt.Sprintf("%d;%d;%s;%d", ld.ProductID, ld.DeviceID, ld.ConnID, ld.Timestamp)
 
 	password := utils.HmacSha256Pass(username, []byte(secret))
-	fmt.Printf("生成的password为%s\n", password)
+	fmt.Printf("username: %s\npassword: %s\n", username, password)
 }

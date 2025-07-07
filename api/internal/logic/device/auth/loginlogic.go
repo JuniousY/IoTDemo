@@ -27,7 +27,8 @@ type LoginDevice struct {
 	Timestamp int64  // unix时间戳
 }
 
-const ReqMaxDelay = 60 * 10 // 10分钟
+const ReqMaxDelay = 60 * 24 * 365 // 测试 正式上线时此处配置需要重构为在配置中心管理
+//const ReqMaxDelay = 60 * 10 // 10分钟
 
 // 设备登录认证
 func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic {

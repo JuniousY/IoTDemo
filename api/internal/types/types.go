@@ -9,6 +9,18 @@ type CreateDeviceReq struct {
 	Info       string `json:"info,optional"`
 }
 
+type DeviceAccessReq struct {
+	Username string `json:"username,omitempty"`          //用户名
+	Topic    string `json:"topic,omitempty"`             //主题
+	ClientID string `json:"clientID,optional,omitempty"` //clientID
+	Action   string `json:"action,omitempty"`            //操作
+	Ip       string `json:"ip,omitempty"`                //访问的ip地址
+}
+
+type DeviceAccessResp struct {
+	Result string `json:"result"` //验证结果 "allow" | "deny" | "ignore"
+}
+
 type DeviceInfo struct {
 	Id         int64  `json:"id"`
 	ProductId  int    `json:"productId"`
@@ -23,6 +35,7 @@ type DeviceInfo struct {
 type DeviceLoginReq struct {
 	Username    string `json:"username"`                       //用户名
 	Password    string `json:"password,optional"`              //密码
+	ClientID    string `json:"clientID,optional,omitempty"`    //clientID
 	Ip          string `json:"ip"`                             //访问的ip地址
 	Certificate string `json:"certificate,optional,omitempty"` //客户端证书 base64后传过来
 }

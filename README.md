@@ -15,4 +15,7 @@
 
 ## 部署
 
+测试设备连接
+- `username`、`password`: `在`auth_test.go`文件中手动生成
+
 ## 技术细节

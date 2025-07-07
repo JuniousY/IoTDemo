@@ -34,6 +34,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				// 设备操作认证
+				Method:  http.MethodPost,
+				Path:    "/access",
+				Handler: deviceauth.AccessHandler(serverCtx),
+			},
+			{
 				// 设备登录认证
 				Method:  http.MethodPost,
 				Path:    "/login",

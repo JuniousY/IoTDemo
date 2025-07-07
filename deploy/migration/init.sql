@@ -37,3 +37,7 @@ create index product_id_index
 INSERT INTO demo.product (id, name)
 VALUES ('1', 'prod001');
 
+INSERT INTO demo.device (id, product_id, name, secret, info, status, is_online)
+VALUES (1, 1, 'test1', 'RAbIee3mldOc_kdV0vmj', '', 0, 0);
+
+

@@ -1,5 +1,8 @@
 .PHONY: build deploy up
 
+IMAGE_NAME ?= iot-demo
+COMPOSE_DIR ?= deploy/docker
+
 # 构建Docker镜像
 build:
 	@echo "======== DOCKER BUILD START ========"
@@ -8,7 +11,7 @@ build:
 # 部署服务
 deploy:
 	@echo "======== DOCKER COMPOSE DEPLOY START ========"
-	cd deploy/docker && docker compose up -d
+	cd $(COMPOSE_DIR) && docker compose up -d
 
 down:
 	@echo "======== STOPPING SERVICES ========"
@@ -24,7 +27,7 @@ clean:
 # 强制重新构建（无缓存）
 rebuild:
 	@echo "======== REBUILDING IMAGE (NO-CACHE) ========"
-	docker build --no-cache -f $(DOCKERFILE) -t $(IMAGE_NAME) .
+	docker build --no-cache -f Dockerfile -t $(IMAGE_NAME) .
 	@echo "Image rebuilt"
 
 # 一键构建并部署
