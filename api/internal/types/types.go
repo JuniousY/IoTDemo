@@ -41,7 +41,8 @@ type DeviceLoginReq struct {
 }
 
 type DeviceLoginResp struct {
-	Result string `json:"result"` //验证结果 "allow" | "deny" | "ignore"
+	Result      string `json:"result"`                //验证结果 "allow" | "deny" | "ignore"
+	IsSuperuser bool   `json:"is_superuser,optional"` //是否为超级用户，可选 true | false，该项为空时默认为 false
 }
 
 type DeviceResp struct {

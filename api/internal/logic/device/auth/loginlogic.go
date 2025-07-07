@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"api/internal/config"
 	"api/internal/utils"
 	"context"
 	"fmt"
@@ -42,6 +43,14 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 // Login 设备登录认证
 // 参考文档 https://docs.emqx.com/zh/emqx/latest/access-control/authn/http.html
 func (l *LoginLogic) Login(req *types.DeviceLoginReq) (resp *types.DeviceLoginResp, err error) {
+	// 管理员校验
+	if RootCheck(l.svcCtx.Config.AuthWhite, req.Username, req.Password, req.Ip) {
+		return &types.DeviceLoginResp{
+			Result:      "allow",
+			IsSuperuser: true,
+		}, nil
+	}
+
 	lg, err := GetLoginDevice(req.Username)
 	if err != nil {
 		return nil, err
@@ -95,4 +104,31 @@ func GetLoginDevice(userName string) (*LoginDevice, error) {
 		ConnID:    connID,
 		Timestamp: timeStamp,
 	}, nil
+}
+
+// RootCheck 鉴定是否是root账号(提供给mqtt broker)
+func RootCheck(a config.AuthConf, userName, password, ipaddr string) bool {
+	var userCompare bool
+	for _, user := range a.Users {
+		if userName == user.UserName {
+			userCompare = false
+			if password == user.Password {
+				userCompare = true
+			}
+			break
+		}
+	}
+	if !userCompare {
+		return false
+	}
+	if len(a.IpRange) == 0 {
+		//如果没有,表示不开启ip白名单模式
+		return true
+	}
+	for _, whiteIp := range a.IpRange {
+		if utils.MatchIP(ipaddr, whiteIp) {
+			return true
+		}
+	}
+	return false
 }

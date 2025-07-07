@@ -2,14 +2,39 @@ Name: IoTDemo
 Host: 0.0.0.0
 Port: 8080
 
-Redis:
-  Host: 127.0.0.1:6379
-  Pass:
-  Type: node
+#Redis:
+#  Host: 127.0.0.1:6379
+#  Pass:
+#  Type: node
+#
+#Mysql:
+#  Host: 127.0.0.1
+#  Port: 3306
+#  User: root
+#  Password: password
+#  Database: demo
+
+Mqtt:
+  ClientID: iot-demo-cli
+  User: dev
+  Pass: passwordInDev
+  Brokers:
+    - tcp://emqx:1883
+#  - tcp://127.0.0.1:1883
 
 Mysql:
-  Host: 127.0.0.1
+  Host: 122.51.223.38
   Port: 3306
-  User: root
-  Password: password
+  User: dev
+  Password: lalaland
   Database: demo
+
+Redis:
+  Host: 122.51.223.38:6379
+  Pass: difyai123456
+  Type: node
+
+AuthWhite:
+  Users:
+    - UserName: dev
+      Password: passwordInDev
