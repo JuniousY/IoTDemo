@@ -22,6 +22,10 @@ Mqtt:
     - tcp://emqx:1883
 #  - tcp://127.0.0.1:1883
 
+RabbitMQ:
+  URL: amqp://guest:guest@rabbitmq:5672/
+  Exchange: exchange
+
 AuthWhite:
   Users:
     - UserName: dev

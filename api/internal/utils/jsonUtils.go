@@ -25,6 +25,12 @@ func Unmarshal[T any](data []byte) T {
 	return obj
 }
 
+func UnmarshalWithErr[T any](data []byte) (T, error) {
+	var obj T
+	err := json.Unmarshal(data, &obj)
+	return obj, err
+}
+
 // MarshalString 序列化为字符串
 func MarshalString[T any](v T) string {
 	return string(Marshal(v))

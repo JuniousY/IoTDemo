@@ -4,6 +4,7 @@ import (
 	"api/internal/config"
 	"api/internal/constants"
 	"api/internal/model"
+	"api/internal/mq"
 	mqttHandler "api/internal/mqtt"
 	"api/internal/repo"
 	"api/internal/utils"
@@ -12,6 +13,7 @@ import (
 	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
+	"github.com/rabbitmq/amqp091-go"
 	red "github.com/redis/go-redis/v9"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -27,6 +29,10 @@ type ServiceContext struct {
 	GormDB   *gorm.DB
 	Redis    *redis.Redis
 	RawRedis *red.Client
+
+	DeviceHandler mqttHandler.DeviceHandler
+
+	RabbitConn *amqp091.Connection
 
 	//mqtt cli
 	MqttCli mqtt.Client
@@ -69,17 +75,25 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ProductRepo: repo.NewProductRepo(db),
 	}
 
-	svc.cacheInit()
+	deviceHandler := mqttHandler.DeviceHandler{
+		GormDB: svc.GormDB,
+		Redis:  svc.Redis,
+	}
+	svc.DeviceHandler = deviceHandler
+
+	svc.initRabbitMQ(c.RabbitMQ)
+
+	svc.initCache()
 
 	// 延迟执行 mqtt client 的 connect 操作.
 	go func() {
-		svc.InitMQTT(c)
+		svc.initMQTT(c)
 	}()
 
 	return svc
 }
 
-func (svc *ServiceContext) InitMQTT(c config.Config) {
+func (svc *ServiceContext) initMQTT(c config.Config) {
 	var tryTime = 5
 	var cli mqtt.Client
 	var err error
@@ -98,14 +112,10 @@ func (svc *ServiceContext) InitMQTT(c config.Config) {
 		os.Exit(-1)
 	}
 	svc.MqttCli = cli
+	svc.DeviceHandler.Cli = cli
 
 	// 注册方法
-	handler := mqttHandler.DeviceHandler{
-		GormDB: svc.GormDB,
-		Redis:  svc.Redis,
-		Cli:    svc.MqttCli,
-	}
-	handler.SubscribeTopic()
+	svc.DeviceHandler.SubscribeTopic()
 }
 
 func initMqtt(conf *config.MqttConf) (mc mqtt.Client, err error) {
@@ -140,7 +150,57 @@ func initMqtt(conf *config.MqttConf) (mc mqtt.Client, err error) {
 	return
 }
 
-func (svc *ServiceContext) cacheInit() {
+func (svc *ServiceContext) initRabbitMQ(conf *config.RabbitMQConf) {
+	conn, err := amqp091.Dial(conf.URL)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to connect to RabbitMQ: %v", err))
+	}
+	svc.RabbitConn = conn
+
+	svc.registerRabbitMQ()
+}
+
+func (svc *ServiceContext) registerRabbitMQ() {
+	conf := svc.Config.RabbitMQ
+	ch, err := svc.RabbitConn.Channel()
+	if err != nil {
+		panic(fmt.Sprintf("create channel err: %s", err))
+	}
+	err = ch.ExchangeDeclare(conf.Exchange, "direct", true, false, false, false, nil)
+	if err != nil {
+		panic(fmt.Sprintf("create exchange err: %s", err))
+	}
+
+	// 注册并启动消费者
+	ch.QueueDeclare(constants.DeviceUpQueue, true, false, false, false, nil)
+	ch.QueueBind(
+		constants.DeviceUpQueue,
+		constants.DeviceUpRouteKey,
+		conf.Exchange,
+		false, nil)
+	handler := svc.DeviceHandler
+	consumer := &mq.Consumer{
+		Channel:   ch,
+		QueueName: constants.DeviceUpQueue,
+		WorkerNum: 3,
+		AutoAck:   false,
+		Handler:   handler.ConsumeDataUploadMsg,
+	}
+	consumer.Start()
+
+	// 注册生产者
+	producer := &mq.Producer{
+		Channel:     ch,
+		Exchange:    conf.Exchange,
+		RoutingKey:  constants.DeviceUpRouteKey,
+		Mandatory:   false,
+		Immediate:   false,
+		ContentType: "application/json",
+	}
+	svc.DeviceHandler.Producer = producer
+}
+
+func (svc *ServiceContext) initCache() {
 	productCache, err := utils.NewCache(utils.CacheConfig[model.Product, int]{
 		Redis:    svc.Redis,
 		RawRedis: svc.RawRedis,

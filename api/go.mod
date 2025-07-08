@@ -6,6 +6,7 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.5.0
 	github.com/google/uuid v1.6.0
 	github.com/maypok86/otter/v2 v2.1.1
+	github.com/rabbitmq/amqp091-go v1.9.0
 	github.com/redis/go-redis/v9 v9.11.0
 	github.com/zeromicro/go-zero v1.8.4
 	golang.org/x/sync v0.15.0

@@ -1,8 +1,8 @@
 package constants
 
 const (
-	ShareSubTopicPrefix = "$queue/"
+	ShareSubTopicPrefix = "$share/group1/"
 	TopicConnectStatus  = ShareSubTopicPrefix + "$SYS/brokers/+/clients/#"
 
-	TopicExt = ShareSubTopicPrefix + "$ext/up/#"
+	TopicDataUpload = ShareSubTopicPrefix + "device/+/data/up"
 )

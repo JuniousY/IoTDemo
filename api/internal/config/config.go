@@ -10,6 +10,7 @@ type Config struct {
 	Redis     redis.RedisConf
 	Mysql     *MysqlConf
 	Mqtt      *MqttConf
+	RabbitMQ  *RabbitMQConf
 	AuthWhite AuthConf
 }
 
@@ -27,6 +28,11 @@ type MqttConf struct {
 	User     string   `json:",default=root"` //用户名
 	Pass     string   `json:",optional"`     //密码
 	ConnNum  int      `json:",default=1"`    //默认连接数
+}
+
+type RabbitMQConf struct {
+	URL      string
+	Exchange string
 }
 
 type AuthConf struct {
