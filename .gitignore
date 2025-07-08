@@ -34,4 +34,5 @@ go.work.sum
 # demo 测试文件夹
 /demo
 /demo2
+/doc
 
